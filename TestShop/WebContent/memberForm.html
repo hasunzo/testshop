@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>회원 가입창</title>
+	<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			let checkNum = /[0-9]/;
+			let checkEng = /[a-zA-Z]/;
+			let checkSpe = /[~!@#$%^&*()_+|<>?:{}]/;
+			let checkKor = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+			//아이디 유효성
+			function checkId(){
+				//영어, 숫자로만 5자이상
+				let id = $('#id').val();
+				let kor = id.search(checkKor);
+				let spe = id.search(checkSpe);
+				
+				if(id.length < 5){
+					$('.tdid').text("아이디는 5자 이상 입력해주세요.")
+					return false;
+				} else if(id.search(/\s/)!=-1){
+					$('.tdid').text("공백은 입력할 수 없습니다.")
+					return false;
+				} else if(kor > 0 || spe > 0){
+					$('.tdid').text("아이디는 영문, 숫자로만 입력해주세요.")
+					return false;
+				} else {
+					$('.tdid').text("");
+					return true;
+				} 
+			}
+			
+			//비밀번호 유효성
+			function checkPwd(){
+				//영어, 숫자, 특수문자 포함 최소 8자이상 20자이하
+				let pwd = $('#pwd').val();
+				let num = pwd.search(checkNum);
+				let eng = pwd.search(checkEng);
+				let spe = pwd.search(checkSpe);
+				
+				if(pwd.length < 8 || pwd.length > 20){
+					$('.tdpwd').text("비밀번호는 8자 ~ 20자 이내로 입력해주세요.")
+					return false;
+				} else if(pwd.search(/\s/)!=-1){
+					$('.tdpwd').text("공백은 입력할 수 없습니다.")
+					return false;
+				} else if(num < 0 || eng < 0 || spe < 0){
+					$('.tdpwd').text("영문, 숫자, 특수문자를 포함하여 입력해주세요.")
+					return false;
+				} else {
+					$('.tdpwd').text("");
+					return true;
+				}
+			}
+			
+			//이름 유효성
+			function checkName(){
+				//한글 5자이내
+				let name = $('#name').val();
+				let regExp = /^[가-힣]{2,5}$/;
+				
+				if(!regExp.test(name)){
+					$('.tdname').text("이름은 한글 2자~5자이내로 입력해주세요.");
+					return false;
+				} else if (name.search(/\s/)!=-1){
+					$('.tdname').text("공백은 입력할 수 없습니다.")
+					return false;
+				} else {
+					$('.tdname').text("");
+					return true;
+				}
+			}
+			
+			//이메일 유효성
+			function checkEmail(){
+				//email@naver.com 형식
+				let email = $('#email').val();
+				let regExp = /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+
+				if(!regExp.test(email)){
+					$('.tdemail').text("이메일 주소가 올바르지 않습니다. 예)test@gmail.com")
+					return false;
+				} else if(email.length < 1){
+					$('.tdemail').text("이메일 주소를 입력해주세요.")
+					return false;
+				} else {
+					$('.tdemail').text("");
+					return true;
+				}
+				
+			}
+			
+			//전화번호 유효성
+			function checkTel(){
+				//010-1234-5678 / 01012345678
+				let tel = $('#tel').val();
+				let regExp = /^\d{3}-\d{3,4}-\d{4}$/;
+				
+				if(!regExp.test(tel)){
+					$('.tdtel').text("핸드폰번호가 올바르지 않습니다(ex. 010-0000-0000)");
+					return false;
+				} else {
+					$('.tdtel').text("");
+					return true;
+				}
+			}
+			
+			//우편번호 검색
+			$("#btnAddr").on("click",function(){
+				new daum.Postcode({
+					oncomplete: function(data) {
+						var fullAddr = '';
+						var extraAddr = '';
+						if (data.userSelectedType === 'R') {
+							fullAddr = data.roadAddress;
+						} else {
+							fullAddr = data.jibunAddress;
+						}
+						if(data.userSelectedType === 'R'){
+							if(data.bname !== ''){
+								extraAddr += data.bname;
+							}
+							if(data.buildingName !== ''){
+								extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+							}
+							fullAddr += (extraAddr !== '' ? ' ('+ extraAddr +')' : '');
+						}
+						$('#zip_code').val(data.zonecode);
+						$('#address').val(fullAddr);
+						$('#detail_address').focus();
+					}
+				}).open();
+			});
+			
+			$('#id').on('keyup', checkId);
+			$('#pwd').on('keyup', checkPwd);
+			$('#name').on('keyup', checkName);
+			$('#email').on('keyup', checkEmail);
+			$('#tel').on('keyup', checkTel);
+			
+			$('#submit').click(function(){
+				if(checkId() == false) return false;
+				if(checkPwd() == false) return false;
+				if(checkName() == false) return false;
+				if(checkEmail() == false) return false;
+				if(checkTel() == false) return false;
+				
+				return true;
+				
+			});
+		});
+		
+	
+	</script>
+</head>
+<body>
+	<form name = "frmMember" method="post" action="member">
+		<table>	
+			<th>회원 가입 창</th>
+			<tr>
+				<td>아이디</td>
+				<td><input type="text" name="id" id="id"></td>
+				<td class ="tdid"></td>
+			</tr>
+			<tr>
+				<td>비밀번호</td>
+				<td><input type="password" name="pwd" id="pwd"></td>
+				<td class ="tdpwd"></td>
+			</tr>
+			<tr>
+				<td>이름</td>
+				<td><input type="text" name="name" id="name"></td>
+				<td class ="tdname"></td>
+			</tr>
+			<tr>
+				<td>이메일</td>
+				<td><input type="text" name="email" id="email"></td>
+				<td class ="tdemail"></td>
+			</tr>
+			<tr>
+				<td>전화번호</td>
+				<td><input type="text" name="tel" id="tel"></td>
+				<td class ="tdtel"></td>
+			</tr>
+			<tr>
+				<td>우편번호</td>
+				<td>
+					<input type="text" name="zip_code" id="zip_code">
+					<input type="button" value="우편번호검색" id="btnAddr"/>
+				</td>
+			</tr>
+			<tr>
+				<td>주소</td>
+				<td><input type="text" name="address" id="address"></td>
+				<td class ="tdaddress"></td>
+			</tr>
+			<tr>
+				<td>상세주소</td>
+				<td><input type="text" name="detail_address"></td>
+			</tr>
+		</table>
+		<input type="submit" value="가입하기" id="submit">
+		<input type="reset" value="다시입력">
+		<input type="hidden" name="command" value="addMember"/>
+	</form>
+</body>
+</html>
